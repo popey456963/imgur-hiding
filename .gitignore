@@ -48,6 +48,6 @@ Temporary Items
 
 node_modules
 
-static/cover
-static/image
-static/output
+static/cover/
+static/image/
+static/output/
