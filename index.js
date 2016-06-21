@@ -18,10 +18,10 @@ app.get('/merge', function(req, res) {
 
   // JPG doesn't suport opacity, so when coverURL is .jpg this doesn't work
 
-  imageURL = "https://i.imgur.com/s1Ns3Vr.jpg"
+  imageURL = req.query.image
   imagefiletype = imageURL.split(".")
   imagefiletype = imagefiletype[imagefiletype.length - 1]
-  coverURL = "https://i.imgur.com/yNAsDDD.png"
+  coverURL = req.query.cover
   coverfiletype = coverURL.split(".")
   coverfiletype = coverfiletype[coverfiletype.length - 1]
 
@@ -29,7 +29,7 @@ app.get('/merge', function(req, res) {
   var imageName = "./static/image/" + guid + "." + imagefiletype
   var coverName = "./static/cover/" + guid + "." + coverfiletype
   var outputName = "./static/output/" + guid + ".png"
-  var ourputURL = "merge.sinisterheavens.com/output/" + guid + ".png"
+  var outputURL = "http://merge.sinisterheavens.com/output/" + guid + ".png"
 
   console.log("GUID: " + guid)
 
@@ -45,20 +45,25 @@ app.get('/merge', function(req, res) {
     if (err) console.log(err)
     console.log(results)
     // Read in the coverName file
-    jimp.read(coverName, function (err, image) {
-      if (err) console.log(err)
-      // Change the opacity of the covername to 0.5 and write it to the same name
-      image.opacity(0.5).flip(true, true).write(coverName, function() {
-        // Read the image file, draw onto it the cover file and save it to output
-        images(imageName).draw(images(coverName), 0, 0).save(outputName)
-        request.post({
-          headers: { "Content-Type": "application/json", "Authorization": "Client-ID 30864587c095d69" },
-          url:     "https://api.imgur.com/3/image/",
-          body:    { image: outputURL },
-          json:    true
-        }, function(error, response, body) {
-          console.log(JSON.stringify(body))
-          res.send(JSON.parse(body)["data"]["link"])
+    easyimg.convert({
+      src: coverName, dst: "./static/cover/" + guid + "." + "png"
+    }).then(function() {
+      coverName = "./static/cover/" + guid + "." + "png"
+      jimp.read(coverName, function (err, image) {
+        if (err) console.log(err)
+        // Change the opacity of the covername to 0.5 and write it to the same name
+        image.opacity(parseFloat(req.query.opacity)).flip(true, true).write(coverName, function() {
+          // Read the image file, draw onto it the cover file and save it to output
+          images(imageName).draw(images(coverName), 0, 0).save(outputName)
+          request.post({
+            headers: { "Content-Type": "application/json", "Authorization": "Client-ID 30864587c095d69" },
+            url:     "https://api.imgur.com/3/image/",
+            body:    { image: outputURL },
+            json:    true
+          }, function(error, response, body) {
+            console.log(JSON.stringify(body))
+            res.send(body["data"]["link"])
+          })
         })
       })
     })

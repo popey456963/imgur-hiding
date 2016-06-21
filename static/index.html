@@ -12,7 +12,7 @@
 </head>
 
 <body>
-    <form id="form">
+    <form id="form" onsubmit="return false">
         <h1>Image Masker</h1>
         <fieldset>
             <input class="floatlabel" id="userimage" type="text" placeholder="Your Image"/>
@@ -28,7 +28,6 @@
         </fieldset>
     </form>
 
-
     <script>
       (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
       (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
@@ -40,6 +39,25 @@
     </script>
     <script src='js/jquery.js'></script>
     <script src='js/placeholder.js'></script>
+    <script>
+    $('#button').click(function(button) {
+        $('input[type="submit"]').prop('disabled', true);
+        userImage = $('#userimage').val()
+        mask = $('#mask').val()
+        opacity = String(parseInt($('#opacity').val())/100)
+        $.get( "/merge?image=" + userImage + "&cover=" + mask + "&opacity=" + opacity, function( data ) {
+          console.log( "Data Loaded: " + data )
+          if(data.indexOf("http") > - 1) {
+            window.location.replace(data)
+          } else {
+            alert("Error!  Try again.")
+            $('input[type="submit"]').prop('disabled', false);
+          }
+        })
+    })
+
+    </script>
+
 </body>
 
 </html>
