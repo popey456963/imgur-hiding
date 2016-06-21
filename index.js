@@ -4,7 +4,6 @@ var mkdirp = require('mkdirp')
 var request = require('request')
 var async = require('async')
 var fs = require('fs')
-var imgur = require('imgur')
 
 var express = require('express')
 var app = express()
@@ -14,9 +13,6 @@ app.use(express.static('static'))
 mkdirp.sync('./static/cover')
 mkdirp.sync('./static/image')
 mkdirp.sync('./static/output')
-
-imgur.setClientId('7a9aed4b79a9dc1')
-imgur.setCredentials('alexander@debenclipper.com', 'se3RhhVhVQTMF3Ht', 'aCs53GSs4tga0ikp')
 
 app.get('/merge', function(req, res) {
 
