@@ -4,6 +4,7 @@ var mkdirp = require('mkdirp')
 var request = require('request')
 var async = require('async')
 var fs = require('fs')
+var imgur = require('imgur')
 
 var express = require('express')
 var app = express()
@@ -13,6 +14,9 @@ app.use(express.static('static'))
 mkdirp.sync('./static/cover')
 mkdirp.sync('./static/image')
 mkdirp.sync('./static/output')
+
+imgur.setClientId('7a9aed4b79a9dc1')
+imgur.setCredentials('alexander@debenclipper.com', 'se3RhhVhVQTMF3Ht', 'aCs53GSs4tga0ikp')
 
 app.get('/merge', function(req, res) {
 
@@ -29,6 +33,7 @@ app.get('/merge', function(req, res) {
   var imageName = "./static/image/" + guid + "." + imagefiletype
   var coverName = "./static/cover/" + guid + "." + coverfiletype
   var outputName = "./static/output/" + guid + ".png"
+  var ourputURL = "merge.sinisterheavens.com/output/" + guid + ".png"
 
   console.log("GUID: " + guid)
 
@@ -50,7 +55,15 @@ app.get('/merge', function(req, res) {
       image.opacity(0.5).flip(true, true).write(coverName, function() {
         // Read the image file, draw onto it the cover file and save it to output
         images(imageName).draw(images(coverName), 0, 0).save(outputName)
-        res.send("localhost:3000/output/" + guid + ".png")
+        request.post({
+          headers: { "Content-Type": "application/json", "Authorization": "Client-ID 30864587c095d69" },
+          url:     "https://api.imgur.com/3/image/",
+          body:    { image: outputURL },
+          json:    true
+        }, function(error, response, body) {
+          console.log(JSON.stringify(body))
+          res.send(JSON.parse(body)["data"]["link"])
+        })
       })
     })
   }
@@ -58,6 +71,6 @@ app.get('/merge', function(req, res) {
 })
 
 
-app.listen(3000, function () {
+app.listen(6666, function () {
   console.log('Image Merger Started Successfully!')
 });
